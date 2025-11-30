@@ -1,0 +1,46 @@
+# depslib dependency file v1.0
+1763897412 source:c:\users\elijah\documents\github\snakewithoutmodules\snakevideogame\field.cpp
+	<iostream>
+	<vector>
+	<deque>
+	<windows.h>
+
+1764485294 source:c:\users\elijah\documents\github\snakewithoutmodules\snakevideogame\food.cpp
+	<iostream>
+	<vector>
+	<deque>
+	<windows.h>
+
+1763897412 source:c:\users\elijah\documents\github\snakewithoutmodules\snakevideogame\game.cpp
+	<iostream>
+	<vector>
+	<deque>
+	<windows.h>
+	"field.cpp"
+	"food.cpp"
+	"snake.cpp"
+
+1763897412 c:\users\elijah\documents\github\snakewithoutmodules\snakevideogame\field.cpp
+	<iostream>
+	<vector>
+	<deque>
+	<windows.h>
+
+1764485294 c:\users\elijah\documents\github\snakewithoutmodules\snakevideogame\food.cpp
+	<iostream>
+	<vector>
+	<deque>
+	<windows.h>
+
+1763897412 c:\users\elijah\documents\github\snakewithoutmodules\snakevideogame\snake.cpp
+	<iostream>
+	<vector>
+	<deque>
+	<windows.h>
+
+1763897412 source:c:\users\elijah\documents\github\snakewithoutmodules\snakevideogame\snake.cpp
+	<iostream>
+	<vector>
+	<deque>
+	<windows.h>
+
