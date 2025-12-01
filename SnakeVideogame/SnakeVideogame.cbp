@@ -32,7 +32,11 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="field.cpp" />
+		<Unit filename="food.cpp" />
+		<Unit filename="game.cpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="snake.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

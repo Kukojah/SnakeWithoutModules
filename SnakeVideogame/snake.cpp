@@ -6,21 +6,21 @@
 class Snake
 {
     private:
-        std::deque<std::vector<int>> Pos;
+        std::deque<std::vector<int>> SnakePos;
         int Length;
         std::vector<int> Movement;
     public:
         std::deque<std::vector<int>> SetPos(int W, int H)
         {
-            Pos = {{W / 2, H / 2}, {(W / 2) - 1, H / 2}};
-            Length = Pos.size();
+            SnakePos = {{W / 2, H / 2}, {(W / 2) - 1, H / 2}};
+            Length = SnakePos.size();
             Movement = {-1, 0};
-            return Pos;
+            return SnakePos;
         }
 
-        std::deque<std::vector<int>> ReadPos()
+        std::deque<std::vector<int>> ReadSnakePos()
         {
-            return Pos;
+            return SnakePos;
         }
 
         std::vector<int> SetMovement(std::vector<int> NewMovement)
@@ -28,20 +28,6 @@ class Snake
             Movement = NewMovement;
             return Movement;
         }
-
-        /*bool CheckSelfCollision(std::deque<std::vector<int>> PosToCheck, int ThePos)
-        {
-            std::deque<std::vector<int>> PosChecking = PosToCheck;
-            if ()
-            for (std::vector<int> Value : PosChecking)
-            {
-                if (Value[0] == PosToCheck[ThePos][0] && Value[1] == PosToCheck[ThePos][1])
-                {
-                    return true
-                }
-            }
-            return false;
-        }*/
 
         int IncreaseSize(int H, int W)
         {
