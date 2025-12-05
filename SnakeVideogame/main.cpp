@@ -6,15 +6,15 @@
 #define VK_R 0x52
 #endif
 #include "field.cpp"
-#include "food.cpp"
-#include "snake.cpp"
 
 const int FPS = 5;
 const int FIELD_WIDTH = 20;
 const int FIELD_HEIGHT = 15;
 Field GameField;
-Food Meat;
-Snake Player;
+std::vector<int> FoodPos;
+std::deque<std::vector<int>> SnakePos;
+int SnakeLength;
+std::vector<int> SnakeMovement;
 bool GameRun = true;
 bool GameOver = false;
 bool GameWon = false;
@@ -29,10 +29,30 @@ char ReadKeys(char CurrKey);
 
 int RunGame();
 
+std::deque<std::vector<int>> SetSnakePos(int W, int H);
+
+std::deque<std::vector<int>> ReadSnakePos();
+
+std::vector<int> SetSnakeMovement(std::vector<int> NewMovement);
+
+int IncreaseSnakeSize(int H, int W);
+
+std::vector<int> SetSnakeMove(char LastInput);
+
+std::deque<std::vector<int>> UpdateSnakePos(int W, int H);
+
+std::vector<int> SetFoodPos(std::deque<std::vector<int>> Snake, int W, int H);
+
+bool CheckFoodCollision(std::deque<std::vector<int>> Snake);
+
+std::vector<int> ReadFoodPos();
+
 int main()
 {
     RunGame();
 }
+
+//Game
 
 char ReadKeys(char CurrKey)
 {
@@ -67,12 +87,12 @@ int StartGame()
 {
     system("cls");
     GameField.SetField(FIELD_WIDTH, FIELD_HEIGHT);
-    Meat.SetPos(Player.ReadPos(), FIELD_WIDTH, FIELD_HEIGHT);
-    Player.SetPos(FIELD_WIDTH, FIELD_HEIGHT);
+    SetFoodPos(ReadSnakePos(), FIELD_WIDTH, FIELD_HEIGHT);
+    SetSnakePos(FIELD_WIDTH, FIELD_HEIGHT);
     return 0;
 }
 
-int CheckCollision(std::deque<std::vector<int>> SnakePos, std::vector<int> FoodPos, int OldScore)
+int CheckCollision(std::deque<std::vector<int>> SnakePos, std::vector<int> Food, int OldScore)
 {
     int NewScore = OldScore;
     if (SnakePos[0][0] > FIELD_WIDTH - 1 || SnakePos[0][0] < 0)
@@ -83,18 +103,18 @@ int CheckCollision(std::deque<std::vector<int>> SnakePos, std::vector<int> FoodP
     {
         GameOver = true;
     }
-    if (SnakePos[0][0] == FoodPos[0] && SnakePos[0][1] == FoodPos[1])
+    if (SnakePos[0][0] == Food[0] && SnakePos[0][1] == Food[1])
     {
-        Player.IncreaseSize(FIELD_WIDTH, FIELD_HEIGHT);
-        if (Player.ReadPos().size() >= FIELD_WIDTH * FIELD_WIDTH)
+        IncreaseSnakeSize(FIELD_WIDTH, FIELD_HEIGHT);
+        if (ReadSnakePos().size() >= FIELD_WIDTH * FIELD_WIDTH)
         {
         GameWon = true;
         GameRun = false;
         }
-        Meat.SetPos(Player.ReadPos(), FIELD_WIDTH, FIELD_HEIGHT);
+        SetFoodPos(ReadSnakePos(), FIELD_WIDTH, FIELD_HEIGHT);
         NewScore++;
     }
-    std::deque<std::vector<int>> SnakeBody = Player.ReadPos();
+    std::deque<std::vector<int>> SnakeBody = ReadSnakePos();
     for (int i = 1; i < SnakeBody.size(); i++)
     {
         if (SnakeBody[0][0] == SnakeBody[i][0] && SnakeBody[0][1] == SnakeBody[i][1])
@@ -111,18 +131,18 @@ int RunGame()
     while (GameRun)
     {
         SnakeDrctn = ReadKeys(SnakeDrctn);
-        Player.SetMove(SnakeDrctn);
-        Player.UpdatePos(FIELD_WIDTH, FIELD_HEIGHT);
-        Score = CheckCollision(Player.ReadPos(), Meat.ReadPos(), Score);
+        SetSnakeMove(SnakeDrctn);
+        UpdateSnakePos(FIELD_WIDTH, FIELD_HEIGHT);
+        Score = CheckCollision(ReadSnakePos(), ReadFoodPos(), Score);
         if (GameOver)
         {
             SnakeDrctn = 'o';
-            Player.SetPos(FIELD_WIDTH, FIELD_HEIGHT);
+            SetSnakePos(FIELD_WIDTH, FIELD_HEIGHT);
             Score = 0;
-            Meat.SetPos(Player.ReadPos(), FIELD_WIDTH, FIELD_HEIGHT);
+            SetFoodPos(ReadSnakePos(), FIELD_WIDTH, FIELD_HEIGHT);
             GameOver = false;
         }
-        GameField.UpdateLayout(Meat.ReadPos(), Player.ReadPos());
+        GameField.UpdateLayout(ReadFoodPos(), ReadSnakePos());
         GameField.PrintField(Score);
         Sleep(1000 / FPS);
     }
@@ -136,4 +156,115 @@ int RunGame()
         }
     }
     return 0;
+}
+
+//Snake
+
+std::deque<std::vector<int>> SetSnakePos(int W, int H)
+{
+    SnakePos = { {W / 2, H / 2}, {(W / 2) - 1, H / 2} };
+    SnakeLength = SnakePos.size();
+    SnakeMovement = { -1, 0 };
+    return SnakePos;
+}
+
+std::deque<std::vector<int>> ReadSnakePos()
+{
+    return SnakePos;
+}
+
+std::vector<int> SetSnakeMovement(std::vector<int> NewMovement)
+{
+    SnakeMovement = NewMovement;
+    return SnakeMovement;
+}
+
+int IncreaseSnakeSize(int H, int W)
+{
+    SnakePos.push_back(std::vector<int>(2, 0));
+    SnakePos[SnakeLength][0] = SnakePos[SnakeLength - 1][0] - SnakeMovement[0];
+    SnakePos[SnakeLength][1] = SnakePos[SnakeLength - 1][1] - SnakeMovement[1];
+    if ((SnakePos[SnakeLength][0] < 0 || SnakePos[SnakeLength][0] > W))
+    {
+        SnakePos[SnakeLength][0] = SnakePos[SnakeLength - 1][0];
+        SnakePos[SnakeLength][1] = SnakePos[SnakeLength - 1][1] - 1;
+        if ((SnakePos[SnakeLength][1] < 0 || SnakePos[SnakeLength][1] > H))
+        {
+            SnakePos[SnakeLength][1] = SnakePos[SnakeLength - 1][1] + 1;
+        }
+    }
+    if ((SnakePos[SnakeLength][1] < 0 || SnakePos[SnakeLength][1] > H))
+    {
+        SnakePos[SnakeLength][0] = SnakePos[SnakeLength - 1][0] - 1;
+        SnakePos[SnakeLength][1] = SnakePos[SnakeLength - 1][1];
+        if ((SnakePos[SnakeLength][0] < 0 || SnakePos[SnakeLength][0] > W))
+        {
+            SnakePos[SnakeLength][0] = SnakePos[SnakeLength - 1][0] + 1;
+        }
+    }
+    SnakeLength++;
+    return 0;
+}
+
+std::vector<int> SetSnakeMove(char LastInput)
+{
+    if (LastInput == 'u')
+    {
+        SnakeMovement = {0, -1};
+    };
+    if (LastInput == 'r')
+    {
+        SnakeMovement = {1, 0};
+    };
+    if (LastInput == 'd')
+    {
+        SnakeMovement = {0, 1};
+    };
+    if (LastInput == 'l')
+    {
+        SnakeMovement = {-1, 0};
+    };
+    return SnakeMovement;
+}
+
+std::deque<std::vector<int>> UpdateSnakePos(int W, int H)
+{
+    for (int i = SnakeLength - 1; i >= 1; i--)
+    {
+        SnakePos[i][0] = SnakePos[i - 1][0];
+        SnakePos[i][1] = SnakePos[i - 1][1];
+    }
+    SnakePos[0][0] += SnakeMovement[0];
+    SnakePos[0][1] += SnakeMovement[1];
+
+    return {};
+}
+
+//Food
+
+std::vector<int> SetFoodPos(std::deque<std::vector<int>> Snake, int W, int H)
+{
+    FoodPos.resize(2, 0);
+    do
+    {
+        FoodPos[0] = rand() % W;
+        FoodPos[1] = rand() % H;
+    } while (CheckFoodCollision(Snake));
+    return {FoodPos[0], FoodPos[1]};
+}
+
+bool CheckFoodCollision(std::deque<std::vector<int>> Snake)
+{
+    for (std::vector<int> Value : Snake)
+    {
+        if (Value[0] == FoodPos[0] && Value[1] == FoodPos[1])
+        {
+            return true;
+        }
+    }
+}
+
+std::vector<int> ReadFoodPos()
+{
+    return { FoodPos[0], FoodPos[1] };
 }
