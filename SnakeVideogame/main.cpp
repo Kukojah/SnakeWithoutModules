@@ -5,12 +5,13 @@
 #ifndef VK_R
 #define VK_R 0x52
 #endif
-#include "field.cpp"
 
 const int FPS = 5;
 const int FIELD_WIDTH = 20;
 const int FIELD_HEIGHT = 15;
-Field GameField;
+std::vector<std::vector<int>> FieldLayout;
+int FieldWidth;
+int FieldHeight;
 std::vector<int> FoodPos;
 std::deque<std::vector<int>> SnakePos;
 int SnakeLength;
@@ -46,6 +47,12 @@ std::vector<int> SetFoodPos(std::deque<std::vector<int>> Snake, int W, int H);
 bool CheckFoodCollision(std::deque<std::vector<int>> Snake);
 
 std::vector<int> ReadFoodPos();
+
+std::vector<std::vector<int>> SetField(int W, int H);
+
+int PrintField(int Score);
+
+std::vector<std::vector<int>> UpdateLayout(std::vector<int> Food, std::deque<std::vector<int>> Snake);
 
 int main()
 {
@@ -86,7 +93,7 @@ char ReadKeys(char CurrKey)
 int StartGame()
 {
     system("cls");
-    GameField.SetField(FIELD_WIDTH, FIELD_HEIGHT);
+    SetField(FIELD_WIDTH, FIELD_HEIGHT);
     SetFoodPos(ReadSnakePos(), FIELD_WIDTH, FIELD_HEIGHT);
     SetSnakePos(FIELD_WIDTH, FIELD_HEIGHT);
     return 0;
@@ -142,8 +149,8 @@ int RunGame()
             SetFoodPos(ReadSnakePos(), FIELD_WIDTH, FIELD_HEIGHT);
             GameOver = false;
         }
-        GameField.UpdateLayout(ReadFoodPos(), ReadSnakePos());
-        GameField.PrintField(Score);
+        UpdateLayout(ReadFoodPos(), ReadSnakePos());
+        PrintField(Score);
         Sleep(1000 / FPS);
     }
     if (GameWon)
@@ -268,3 +275,43 @@ std::vector<int> ReadFoodPos()
 {
     return { FoodPos[0], FoodPos[1] };
 }
+
+//Field
+
+std::vector<std::vector<int>> SetField(int W, int H)
+{
+        FieldWidth = W;
+        FieldHeight = H;
+        FieldLayout.resize(W, std::vector<int> (H, 0));
+
+        return FieldLayout;
+}
+
+    int PrintField(int Score)
+    {
+        system("cls");
+        for (int i = 0; i < FieldHeight; i++)
+        {
+            for (int u = 0; u < FieldWidth; u++)
+            {
+                std::cout << FieldLayout[u][i];
+            }
+            std::cout << std::endl;
+        }
+        std::cout << Score;
+        return 1;
+    }
+
+    std::vector<std::vector<int>> UpdateLayout(std::vector<int> Food, std::deque<std::vector<int>> Snake)
+    {
+        std::vector<std::vector<int>> NewLayout(FieldWidth, std::vector<int> (FieldHeight, 0));
+        NewLayout[Food[0]][Food[1]] = 1;
+        for (std::vector<int> Value : Snake)
+        {
+             NewLayout[Value[0]][Value[1]] = 2;
+        }
+        NewLayout[Snake[0][0]][Snake[0][1]] = 2;
+        NewLayout[Snake[1][0]][Snake[1][1]] = 2;
+        FieldLayout = NewLayout;
+        return NewLayout;
+    }
